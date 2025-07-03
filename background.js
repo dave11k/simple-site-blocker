@@ -38,7 +38,7 @@ chrome.declarativeNetRequest.onRuleMatchedDebug.addListener((details) => {
   });
 });
 
-// Add logging for tab navigation attempts
+// Add logging and blocking for tab navigation attempts
 chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
   if (changeInfo.url && changeInfo.status === "loading") {
     console.log("🌐 Tab navigation detected:", {
@@ -66,12 +66,22 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
       });
 
       if (shouldBlock) {
-        console.log("⚠️ URL should be blocked but tab navigation detected:", {
+        console.log("🚫 BLOCKING navigation via tabs API:", {
           url: changeInfo.url,
           hostname: hostname,
           blockedSites: blockingState.blockedSites,
           shouldBlock: shouldBlock,
         });
+
+        // Force redirect to blocked page
+        try {
+          await chrome.tabs.update(tabId, {
+            url: chrome.runtime.getURL("blocked.html"),
+          });
+          console.log("✅ Successfully redirected tab to blocked page");
+        } catch (error) {
+          console.error("❌ Failed to redirect tab:", error);
+        }
       }
     }
   }
@@ -180,138 +190,10 @@ async function updateBlockingRules(sites) {
 
       console.log(`🔧 Creating comprehensive rules for site: ${cleanSite}`);
 
-      // Rule 1: Block exact domain with HTTP and any path
+      // Rule 1: Block using requestDomains (most reliable approach)
       rules.push({
         id: index * 10 + 1,
-        priority: 1,
-        action: {
-          type: "redirect",
-          redirect: {
-            url: chrome.runtime.getURL("blocked.html"),
-          },
-        },
-        condition: {
-          urlFilter: `http://${cleanSite}/*`,
-          resourceTypes: ["main_frame"],
-        },
-      });
-
-      // Rule 2: Block exact domain with HTTPS and any path
-      rules.push({
-        id: index * 10 + 2,
-        priority: 1,
-        action: {
-          type: "redirect",
-          redirect: {
-            url: chrome.runtime.getURL("blocked.html"),
-          },
-        },
-        condition: {
-          urlFilter: `https://${cleanSite}/*`,
-          resourceTypes: ["main_frame"],
-        },
-      });
-
-      // Rule 3: Block www subdomain with HTTP and any path
-      rules.push({
-        id: index * 10 + 3,
-        priority: 1,
-        action: {
-          type: "redirect",
-          redirect: {
-            url: chrome.runtime.getURL("blocked.html"),
-          },
-        },
-        condition: {
-          urlFilter: `http://www.${cleanSite}/*`,
-          resourceTypes: ["main_frame"],
-        },
-      });
-
-      // Rule 4: Block www subdomain with HTTPS and any path
-      rules.push({
-        id: index * 10 + 4,
-        priority: 1,
-        action: {
-          type: "redirect",
-          redirect: {
-            url: chrome.runtime.getURL("blocked.html"),
-          },
-        },
-        condition: {
-          urlFilter: `https://www.${cleanSite}/*`,
-          resourceTypes: ["main_frame"],
-        },
-      });
-
-      // Rule 5: Block exact domain without path (root) HTTP
-      rules.push({
-        id: index * 10 + 5,
-        priority: 1,
-        action: {
-          type: "redirect",
-          redirect: {
-            url: chrome.runtime.getURL("blocked.html"),
-          },
-        },
-        condition: {
-          urlFilter: `http://${cleanSite}`,
-          resourceTypes: ["main_frame"],
-        },
-      });
-
-      // Rule 6: Block exact domain without path (root) HTTPS
-      rules.push({
-        id: index * 10 + 6,
-        priority: 1,
-        action: {
-          type: "redirect",
-          redirect: {
-            url: chrome.runtime.getURL("blocked.html"),
-          },
-        },
-        condition: {
-          urlFilter: `https://${cleanSite}`,
-          resourceTypes: ["main_frame"],
-        },
-      });
-
-      // Rule 7: Block www version without path (root) HTTP
-      rules.push({
-        id: index * 10 + 7,
-        priority: 1,
-        action: {
-          type: "redirect",
-          redirect: {
-            url: chrome.runtime.getURL("blocked.html"),
-          },
-        },
-        condition: {
-          urlFilter: `http://www.${cleanSite}`,
-          resourceTypes: ["main_frame"],
-        },
-      });
-
-      // Rule 8: Block www version without path (root) HTTPS
-      rules.push({
-        id: index * 10 + 8,
-        priority: 1,
-        action: {
-          type: "redirect",
-          redirect: {
-            url: chrome.runtime.getURL("blocked.html"),
-          },
-        },
-        condition: {
-          urlFilter: `https://www.${cleanSite}`,
-          resourceTypes: ["main_frame"],
-        },
-      });
-
-      // Rule 9: Block using requestDomains (alternative approach)
-      rules.push({
-        id: index * 10 + 9,
-        priority: 1,
+        priority: 10,
         action: {
           type: "redirect",
           redirect: {
@@ -324,10 +206,10 @@ async function updateBlockingRules(sites) {
         },
       });
 
-      // Rule 10: Block using requestDomains with www
+      // Rule 2: Block using requestDomains with www
       rules.push({
-        id: index * 10 + 10,
-        priority: 1,
+        id: index * 10 + 2,
+        priority: 10,
         action: {
           type: "redirect",
           redirect: {
@@ -336,6 +218,134 @@ async function updateBlockingRules(sites) {
         },
         condition: {
           requestDomains: [`www.${cleanSite}`],
+          resourceTypes: ["main_frame"],
+        },
+      });
+
+      // Rule 3: Block exact domain with HTTPS and any path
+      rules.push({
+        id: index * 10 + 3,
+        priority: 9,
+        action: {
+          type: "redirect",
+          redirect: {
+            url: chrome.runtime.getURL("blocked.html"),
+          },
+        },
+        condition: {
+          urlFilter: `https://${cleanSite}/*`,
+          resourceTypes: ["main_frame"],
+        },
+      });
+
+      // Rule 4: Block www subdomain with HTTPS and any path
+      rules.push({
+        id: index * 10 + 4,
+        priority: 9,
+        action: {
+          type: "redirect",
+          redirect: {
+            url: chrome.runtime.getURL("blocked.html"),
+          },
+        },
+        condition: {
+          urlFilter: `https://www.${cleanSite}/*`,
+          resourceTypes: ["main_frame"],
+        },
+      });
+
+      // Rule 5: Block exact domain without path (root) HTTPS
+      rules.push({
+        id: index * 10 + 5,
+        priority: 8,
+        action: {
+          type: "redirect",
+          redirect: {
+            url: chrome.runtime.getURL("blocked.html"),
+          },
+        },
+        condition: {
+          urlFilter: `https://${cleanSite}`,
+          resourceTypes: ["main_frame"],
+        },
+      });
+
+      // Rule 6: Block www version without path (root) HTTPS
+      rules.push({
+        id: index * 10 + 6,
+        priority: 8,
+        action: {
+          type: "redirect",
+          redirect: {
+            url: chrome.runtime.getURL("blocked.html"),
+          },
+        },
+        condition: {
+          urlFilter: `https://www.${cleanSite}`,
+          resourceTypes: ["main_frame"],
+        },
+      });
+
+      // Rule 7: Block exact domain with HTTP and any path
+      rules.push({
+        id: index * 10 + 7,
+        priority: 7,
+        action: {
+          type: "redirect",
+          redirect: {
+            url: chrome.runtime.getURL("blocked.html"),
+          },
+        },
+        condition: {
+          urlFilter: `http://${cleanSite}/*`,
+          resourceTypes: ["main_frame"],
+        },
+      });
+
+      // Rule 8: Block www subdomain with HTTP and any path
+      rules.push({
+        id: index * 10 + 8,
+        priority: 7,
+        action: {
+          type: "redirect",
+          redirect: {
+            url: chrome.runtime.getURL("blocked.html"),
+          },
+        },
+        condition: {
+          urlFilter: `http://www.${cleanSite}/*`,
+          resourceTypes: ["main_frame"],
+        },
+      });
+
+      // Rule 9: Block exact domain without path (root) HTTP
+      rules.push({
+        id: index * 10 + 9,
+        priority: 6,
+        action: {
+          type: "redirect",
+          redirect: {
+            url: chrome.runtime.getURL("blocked.html"),
+          },
+        },
+        condition: {
+          urlFilter: `http://${cleanSite}`,
+          resourceTypes: ["main_frame"],
+        },
+      });
+
+      // Rule 10: Block www version without path (root) HTTP
+      rules.push({
+        id: index * 10 + 10,
+        priority: 6,
+        action: {
+          type: "redirect",
+          redirect: {
+            url: chrome.runtime.getURL("blocked.html"),
+          },
+        },
+        condition: {
+          urlFilter: `http://www.${cleanSite}`,
           resourceTypes: ["main_frame"],
         },
       });
