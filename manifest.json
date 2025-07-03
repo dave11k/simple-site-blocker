@@ -6,9 +6,9 @@
   "permissions": [
     "storage",
     "activeTab",
-    "webRequest",
     "alarms",
-    "declarativeNetRequest"
+    "declarativeNetRequest",
+    "declarativeNetRequestWithHostAccess"
   ],
   "host_permissions": ["<all_urls>"],
   "background": {

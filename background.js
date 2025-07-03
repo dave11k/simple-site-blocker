@@ -81,53 +81,168 @@ async function checkBlockingStatus() {
       const now = Date.now();
       if (now >= blockingState.blockEndTime) {
         await clearBlocking();
+      } else {
+        // Ensure rules are active if still blocking
+        await updateBlockingRules(blockingState.blockedSites);
       }
+    } else {
+      // Clear any stale rules if not blocking
+      await updateBlockingRules([]);
     }
   } catch (error) {
     console.error("Failed to check blocking status:", error);
   }
 }
 
-// Handle web requests to block sites
-chrome.webRequest.onBeforeRequest.addListener(
-  async (details) => {
-    try {
-      const result = await chrome.storage.local.get([
-        STORAGE_KEYS.BLOCKING_STATE,
-      ]);
-      const blockingState =
-        result[STORAGE_KEYS.BLOCKING_STATE] || DEFAULT_BLOCKING_STATE;
+// Update blocking rules using declarativeNetRequest
+async function updateBlockingRules(sites) {
+  try {
+    // First, remove all existing rules
+    const existingRules = await chrome.declarativeNetRequest.getDynamicRules();
+    const ruleIdsToRemove = existingRules.map((rule) => rule.id);
 
-      if (!blockingState.isBlocking || !blockingState.blockedSites) {
-        return {};
-      }
+    console.log(
+      `🧹 Removing ${existingRules.length} existing rules:`,
+      ruleIdsToRemove,
+    );
 
-      const url = new URL(details.url);
-      const hostname = url.hostname.toLowerCase();
-
-      // Check if current site is blocked
-      const isBlocked = blockingState.blockedSites.some((site) => {
-        const cleanSite = site.toLowerCase().replace(/^www\./, "");
-        const cleanHostname = hostname.replace(/^www\./, "");
-        return (
-          cleanHostname === cleanSite || cleanHostname.endsWith("." + cleanSite)
-        );
+    if (ruleIdsToRemove.length > 0) {
+      await chrome.declarativeNetRequest.updateDynamicRules({
+        removeRuleIds: ruleIdsToRemove,
       });
-
-      if (isBlocked) {
-        return {
-          redirectUrl: chrome.runtime.getURL("blocked.html"),
-        };
-      }
-    } catch (error) {
-      console.error("Failed to handle web request:", error);
+      console.log("✅ Existing rules removed successfully");
     }
 
-    return {};
-  },
-  { urls: ["<all_urls>"] },
-  ["blocking"],
-);
+    if (!sites || sites.length === 0) {
+      return; // No sites to block
+    }
+
+    // Create new blocking rules
+    const rules = [];
+    sites.forEach((site, index) => {
+      const cleanSite = site
+        .toLowerCase()
+        .replace(/^www\./, "")
+        .replace(/^https?:\/\//, "")
+        .replace(/\/$/, ""); // Remove trailing slash
+
+      console.log(`Creating rules for site: ${cleanSite}`);
+
+      // Rule 1: Block exact domain with HTTP
+      rules.push({
+        id: index * 6 + 1,
+        priority: 1,
+        action: {
+          type: "redirect",
+          redirect: {
+            url: chrome.runtime.getURL("blocked.html"),
+          },
+        },
+        condition: {
+          urlFilter: `http://${cleanSite}/*`,
+          resourceTypes: ["main_frame"],
+        },
+      });
+
+      // Rule 2: Block exact domain with HTTPS
+      rules.push({
+        id: index * 6 + 2,
+        priority: 1,
+        action: {
+          type: "redirect",
+          redirect: {
+            url: chrome.runtime.getURL("blocked.html"),
+          },
+        },
+        condition: {
+          urlFilter: `https://${cleanSite}/*`,
+          resourceTypes: ["main_frame"],
+        },
+      });
+
+      // Rule 3: Block www subdomain with HTTP
+      rules.push({
+        id: index * 6 + 3,
+        priority: 1,
+        action: {
+          type: "redirect",
+          redirect: {
+            url: chrome.runtime.getURL("blocked.html"),
+          },
+        },
+        condition: {
+          urlFilter: `http://www.${cleanSite}/*`,
+          resourceTypes: ["main_frame"],
+        },
+      });
+
+      // Rule 4: Block www subdomain with HTTPS
+      rules.push({
+        id: index * 6 + 4,
+        priority: 1,
+        action: {
+          type: "redirect",
+          redirect: {
+            url: chrome.runtime.getURL("blocked.html"),
+          },
+        },
+        condition: {
+          urlFilter: `https://www.${cleanSite}/*`,
+          resourceTypes: ["main_frame"],
+        },
+      });
+
+      // Rule 5: Block exact domain without path (root)
+      rules.push({
+        id: index * 6 + 5,
+        priority: 1,
+        action: {
+          type: "redirect",
+          redirect: {
+            url: chrome.runtime.getURL("blocked.html"),
+          },
+        },
+        condition: {
+          urlFilter: `*://${cleanSite}`,
+          resourceTypes: ["main_frame"],
+        },
+      });
+
+      // Rule 6: Block www version without path (root)
+      rules.push({
+        id: index * 6 + 6,
+        priority: 1,
+        action: {
+          type: "redirect",
+          redirect: {
+            url: chrome.runtime.getURL("blocked.html"),
+          },
+        },
+        condition: {
+          urlFilter: `*://www.${cleanSite}`,
+          resourceTypes: ["main_frame"],
+        },
+      });
+    });
+
+    console.log(`Adding ${rules.length} blocking rules for sites:`, sites);
+    console.log("Rule details:", rules);
+
+    // Add the new rules
+    await chrome.declarativeNetRequest.updateDynamicRules({
+      addRules: rules,
+    });
+
+    // Verify rules were added
+    const addedRules = await chrome.declarativeNetRequest.getDynamicRules();
+    console.log(
+      `✅ Successfully added ${addedRules.length} dynamic rules`,
+      addedRules,
+    );
+  } catch (error) {
+    console.error("Failed to update blocking rules:", error);
+  }
+}
 
 // Handle alarms for blocking timer
 chrome.alarms.onAlarm.addListener(async (alarm) => {
@@ -147,6 +262,7 @@ async function handleMessage(request, sender, sendResponse) {
   try {
     switch (request.action) {
       case "startBlocking":
+        console.log("Starting blocking with data:", request.data);
         await startBlocking(request.data);
         sendResponse({ success: true });
         break;
@@ -207,6 +323,9 @@ async function startBlocking(data) {
     [STORAGE_KEYS.BLOCKING_STATE]: blockingState,
   });
 
+  // Update declarativeNetRequest rules
+  await updateBlockingRules(sites);
+
   // Set alarm for automatic clearing
   await chrome.alarms.create("blockingTimer", {
     when: endTime,
@@ -218,6 +337,9 @@ async function clearBlocking() {
   await chrome.storage.local.set({
     [STORAGE_KEYS.BLOCKING_STATE]: DEFAULT_BLOCKING_STATE,
   });
+
+  // Clear all blocking rules
+  await updateBlockingRules([]);
 
   // Clear math challenge state
   await chrome.storage.local.remove([STORAGE_KEYS.MATH_CHALLENGE_STATE]);
