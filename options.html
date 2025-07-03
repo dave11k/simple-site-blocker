@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Focus Buddy - Settings</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="options-container">
+      <div class="options-header">
+        <h1>Focus Buddy Settings</h1>
+        <p>Manage your blocking profiles and preferences</p>
+      </div>
+
+      <!-- Profile Management Section -->
+      <div class="options-section">
+        <h2>📝 Blocking Profiles</h2>
+        <p>Create and manage groups of websites to block together.</p>
+
+        <div class="profile-list" id="profile-list">
+          <!-- Profiles will be dynamically loaded here -->
+        </div>
+
+        <button id="create-profile" class="primary-btn">
+          + Create New Profile
+        </button>
+
+        <!-- Profile Form (hidden by default) -->
+        <div id="profile-form" class="profile-form hidden">
+          <h3 id="form-title">Create New Profile</h3>
+          <form id="profile-form-element">
+            <div class="form-group">
+              <label for="profile-name">Profile Name:</label>
+              <input
+                type="text"
+                id="profile-name"
+                placeholder="e.g., Social Media, Work Focus"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label for="profile-sites">Websites to Block:</label>
+              <textarea
+                id="profile-sites"
+                placeholder="Enter one website per line:&#10;facebook.com&#10;twitter.com&#10;youtube.com&#10;instagram.com"
+                required
+              ></textarea>
+              <small
+                >Enter one website per line without 'http://' or 'www.'</small
+              >
+            </div>
+            <div class="form-actions">
+              <button type="submit" class="primary-btn">Save Profile</button>
+              <button type="button" id="cancel-profile" class="secondary-btn">
+                Cancel
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Math Challenge Settings -->
+      <div class="options-section">
+        <h2>🧮 Math Challenge Settings</h2>
+        <p>
+          Choose the difficulty level for math problems when attempting early
+          unblocking.
+        </p>
+
+        <div class="difficulty-options">
+          <div class="difficulty-option">
+            <input type="radio" id="easy" name="difficulty" value="easy" />
+            <label for="easy">
+              <strong>Easy (3 problems)</strong><br />
+              <small>Single-digit addition and subtraction</small>
+            </label>
+          </div>
+          <div class="difficulty-option">
+            <input type="radio" id="medium" name="difficulty" value="medium" />
+            <label for="medium">
+              <strong>Medium (5 problems)</strong><br />
+              <small>Two-digit operations and simple multiplication</small>
+            </label>
+          </div>
+          <div class="difficulty-option">
+            <input type="radio" id="hard" name="difficulty" value="hard" />
+            <label for="hard">
+              <strong>Hard (7 problems)</strong><br />
+              <small>Mixed operations including division</small>
+            </label>
+          </div>
+        </div>
+
+        <button id="save-difficulty" class="primary-btn">
+          Save Difficulty Setting
+        </button>
+      </div>
+
+      <!-- Distraction Notes -->
+      <div class="options-section">
+        <h2>💭 Distraction Notes</h2>
+        <p>View and manage your captured distraction thoughts.</p>
+
+        <div class="notes-list" id="notes-list">
+          <!-- Notes will be dynamically loaded here -->
+        </div>
+
+        <div class="form-actions">
+          <button id="clear-notes" class="danger-btn">Clear All Notes</button>
+        </div>
+      </div>
+
+      <!-- Statistics Section -->
+      <div class="options-section">
+        <h2>📊 Usage Statistics</h2>
+        <p>Track your Focus Buddy usage and progress.</p>
+
+        <div class="stats-grid">
+          <div class="stat-item">
+            <div class="stat-value" id="total-sessions">0</div>
+            <div class="stat-label">Total Sessions</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value" id="total-time">0h 0m</div>
+            <div class="stat-label">Total Focus Time</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value" id="early-unblocks">0</div>
+            <div class="stat-label">Early Unblocks</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value" id="completed-sessions">0</div>
+            <div class="stat-label">Completed Sessions</div>
+          </div>
+        </div>
+
+        <button id="reset-stats" class="secondary-btn">Reset Statistics</button>
+      </div>
+    </div>
+
+    <script src="options.js"></script>
+  </body>
+</html>

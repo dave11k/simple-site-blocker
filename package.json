@@ -1,0 +1,22 @@
+{
+  "name": "focus-buddy",
+  "version": "1.0.0",
+  "description": "A Chrome extension that blocks websites for specified durations with math challenges for early unblocking",
+  "scripts": {
+    "build": "npm run format && npm run check",
+    "format": "prettier --write .",
+    "check": "npm run format && npm run lint",
+    "lint": "echo 'Linting complete - no linter configured yet'"
+  },
+  "keywords": [
+    "chrome-extension",
+    "productivity",
+    "website-blocker",
+    "focus"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "prettier": "^3.0.0"
+  }
+}

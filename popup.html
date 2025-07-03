@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Focus Buddy</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h1>Focus Buddy</h1>
+
+      <!-- Initial State (Not Blocking) -->
+      <div id="initial-state">
+        <div class="section">
+          <h3>Block Duration</h3>
+          <div class="time-inputs">
+            <label>
+              Hours:
+              <input type="number" id="hours" min="0" max="23" value="0" />
+            </label>
+            <label>
+              Minutes:
+              <input type="number" id="minutes" min="1" max="59" value="30" />
+            </label>
+          </div>
+        </div>
+
+        <div class="section">
+          <h3>Websites to Block</h3>
+          <select id="profile-select">
+            <option value="">Select a profile</option>
+          </select>
+          <div class="or-divider">or</div>
+          <textarea
+            id="manual-sites"
+            placeholder="Enter websites manually (one per line)&#10;Example:&#10;facebook.com&#10;youtube.com&#10;twitter.com"
+          ></textarea>
+        </div>
+
+        <button id="start-blocking" class="primary-btn">Start Blocking</button>
+      </div>
+
+      <!-- Blocking Active State -->
+      <div id="blocking-state" class="hidden">
+        <div class="section">
+          <h3>🚫 Blocking Active</h3>
+          <div class="timer">
+            <div class="time-display" id="time-remaining">00:00:00</div>
+            <div class="time-label">Time Remaining</div>
+          </div>
+          <div class="blocked-sites">
+            <strong>Blocked Sites:</strong>
+            <ul id="blocked-sites-list"></ul>
+          </div>
+        </div>
+
+        <div class="section">
+          <h3>💭 Distraction Thought</h3>
+          <textarea
+            id="distraction-note"
+            placeholder="Quick note about what's distracting you..."
+          ></textarea>
+          <button id="add-note" class="secondary-btn">Add Note</button>
+        </div>
+
+        <button id="cancel-blocking" class="danger-btn">Cancel Blocking</button>
+      </div>
+
+      <!-- Math Challenge State -->
+      <div id="math-challenge" class="hidden">
+        <div class="section">
+          <h3>🧮 Math Challenge</h3>
+          <p>Solve these problems to unblock sites:</p>
+          <div class="problem-progress">
+            <span id="problem-counter">Problem 1 of 5</span>
+          </div>
+          <div class="math-problem">
+            <div class="problem-text" id="problem-text">2 + 3 = ?</div>
+            <input
+              type="number"
+              id="math-answer"
+              placeholder="Enter your answer"
+            />
+            <div class="math-feedback" id="math-feedback"></div>
+          </div>
+          <div class="math-actions">
+            <button id="submit-answer" class="primary-btn">
+              Submit Answer
+            </button>
+            <button id="go-back" class="secondary-btn">Go Back</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Options Link -->
+      <div class="footer">
+        <a href="#" id="open-options">⚙️ Settings</a>
+      </div>
+    </div>
+
+    <script src="popup.js"></script>
+  </body>
+</html>
