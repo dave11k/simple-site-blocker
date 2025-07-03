@@ -8,57 +8,118 @@
   </head>
   <body>
     <div class="blocked-container">
-      <div class="blocked-icon">🚫</div>
-      <h1 class="blocked-title">Site Blocked</h1>
-      <p class="blocked-message">
-        This website has been blocked by Simple Site Blocker to help you stay
-        focused.<br />
-        The blocking session will automatically end at the scheduled time.
-      </p>
-
-      <div class="blocked-time">
-        <strong>Time Remaining: </strong>
-        <span id="countdown">Loading...</span>
+      <!-- Motivational Quote Section -->
+      <div class="quote-section">
+        <div class="quote-icon">✨</div>
+        <blockquote id="motivational-quote" class="quote-text">
+          "Focus is a matter of deciding what things you're not going to do."
+        </blockquote>
+        <cite class="quote-author">— John Carmack</cite>
       </div>
 
-      <div class="blocked-actions">
-        <button id="attempt-unblock" class="blocked-btn primary">
-          🧮 Attempt Early Unblock
-        </button>
-        <button id="add-thought" class="blocked-btn secondary">
-          💭 Add Distraction Thought
-        </button>
-      </div>
+      <!-- Main Content -->
+      <div class="main-content">
+        <h1 class="blocked-title">Stay Focused</h1>
+        <p class="blocked-message">
+          You're here because you chose to prioritize what matters most.
+        </p>
 
-      <!-- Distraction Note Modal -->
-      <div id="note-modal" class="modal hidden">
-        <div class="modal-content">
-          <h3>💭 Distraction Thought</h3>
-          <p>Capture what's distracting you right now:</p>
-          <textarea
-            id="distraction-input"
-            placeholder="What's on your mind?"
-          ></textarea>
-          <div class="modal-actions">
-            <button id="save-note" class="blocked-btn primary">
-              Save Note
-            </button>
-            <button id="cancel-note" class="blocked-btn secondary">
-              Cancel
-            </button>
-          </div>
+        <div class="blocked-time">
+          <strong>Time Remaining: </strong>
+          <span id="countdown">Loading...</span>
         </div>
       </div>
 
-      <div class="blocked-footer">
+      <!-- Distraction Capture - Always Visible -->
+      <div class="distraction-section">
+        <h3>💭 Capture Your Thought</h3>
+        <p>Instead of browsing, write down what's on your mind:</p>
+        <textarea
+          id="distraction-input"
+          placeholder="What brought you here? Write it down to deal with later..."
+          rows="3"
+        ></textarea>
+        <button id="save-note" class="save-btn primary">💾 Save Thought</button>
+        <div id="save-feedback" class="save-feedback hidden"></div>
+      </div>
+
+      <!-- Secondary Actions -->
+      <div class="secondary-actions">
+        <button id="attempt-unblock" class="action-btn secondary">
+          🧮 Solve Math Challenge to Unblock
+        </button>
+        <button id="new-quote" class="action-btn tertiary">🔄 New Quote</button>
+      </div>
+
+      <div class="footer-tip">
         <p>
-          💡 <strong>Tip:</strong> Use this time to focus on your important
-          tasks!
+          🎯 <strong>Remember:</strong> Every moment of focus builds your future
+          self.
         </p>
       </div>
     </div>
 
     <script>
+      // Motivational quotes array
+      const motivationalQuotes = [
+        {
+          text: "Focus is a matter of deciding what things you're not going to do.",
+          author: "John Carmack",
+        },
+        {
+          text: "The successful warrior is the average man with laser-like focus.",
+          author: "Bruce Lee",
+        },
+        {
+          text: "Concentrate all your thoughts upon the work at hand. The sun's rays do not burn until brought to a focus.",
+          author: "Alexander Graham Bell",
+        },
+        {
+          text: "Focus on being productive instead of busy.",
+          author: "Tim Ferriss",
+        },
+        {
+          text: "Where attention goes, energy flows and results show.",
+          author: "T. Harv Eker",
+        },
+        {
+          text: "It is during our darkest moments that we must focus to see the light.",
+          author: "Aristotle",
+        },
+        {
+          text: "The art of being wise is knowing what to overlook.",
+          author: "William James",
+        },
+        {
+          text: "Starve your distractions, feed your focus.",
+          author: "Anonymous",
+        },
+        {
+          text: "Focus is not saying yes to the thing you've got to focus on. It means saying no to the hundred other good ideas.",
+          author: "Steve Jobs",
+        },
+        {
+          text: "Your future is created by what you do today, not tomorrow.",
+          author: "Robert Kiyosaki",
+        },
+      ];
+
+      // Get random quote
+      function getRandomQuote() {
+        return motivationalQuotes[
+          Math.floor(Math.random() * motivationalQuotes.length)
+        ];
+      }
+
+      // Update quote display
+      function updateQuote() {
+        const quote = getRandomQuote();
+        document.getElementById("motivational-quote").textContent =
+          `"${quote.text}"`;
+        document.querySelector(".quote-author").textContent =
+          `— ${quote.author}`;
+      }
+
       // Get blocking state and update countdown
       async function updateBlockedPage() {
         try {
@@ -111,26 +172,6 @@
         updateTimer();
       }
 
-      // Handle attempt unblock
-      document
-        .getElementById("attempt-unblock")
-        .addEventListener("click", () => {
-          // Open extension popup for math challenge
-          chrome.runtime.sendMessage({ action: "openPopup" }, (response) => {
-            if (chrome.runtime.lastError) {
-              alert(
-                "Please click the Simple Site Blocker extension icon to attempt unblocking",
-              );
-            }
-          });
-        });
-
-      // Handle add distraction thought
-      document.getElementById("add-thought").addEventListener("click", () => {
-        document.getElementById("note-modal").classList.remove("hidden");
-        document.getElementById("distraction-input").focus();
-      });
-
       // Handle save note
       document
         .getElementById("save-note")
@@ -138,9 +179,10 @@
           const noteText = document
             .getElementById("distraction-input")
             .value.trim();
+          const feedback = document.getElementById("save-feedback");
 
           if (!noteText) {
-            alert("Please enter a note");
+            showFeedback("Please enter a thought to save", "error");
             return;
           }
 
@@ -164,110 +206,324 @@
             });
 
             document.getElementById("distraction-input").value = "";
-            document.getElementById("note-modal").classList.add("hidden");
+            showFeedback(
+              "✅ Thought saved! Now get back to what matters.",
+              "success",
+            );
 
-            // Show success message
-            const successMsg = document.createElement("div");
-            successMsg.textContent = "✅ Note saved successfully!";
-            successMsg.style.cssText = `
-                    position: fixed;
-                    top: 20px;
-                    right: 20px;
-                    background: #27ae60;
-                    color: white;
-                    padding: 10px 20px;
-                    border-radius: 6px;
-                    z-index: 1000;
-                `;
-            document.body.appendChild(successMsg);
-
-            setTimeout(() => {
-              successMsg.remove();
-            }, 3000);
+            // Change the placeholder after saving
+            document.getElementById("distraction-input").placeholder =
+              "Feeling distracted again? Write it down...";
           } catch (error) {
             console.error("Failed to save note:", error);
-            alert("Failed to save note");
+            showFeedback("❌ Failed to save. Please try again.", "error");
           }
         });
 
-      // Handle cancel note
-      document.getElementById("cancel-note").addEventListener("click", () => {
-        document.getElementById("distraction-input").value = "";
-        document.getElementById("note-modal").classList.add("hidden");
+      // Show feedback message
+      function showFeedback(message, type) {
+        const feedback = document.getElementById("save-feedback");
+        feedback.textContent = message;
+        feedback.className = `save-feedback ${type}`;
+        feedback.classList.remove("hidden");
+
+        setTimeout(() => {
+          feedback.classList.add("hidden");
+        }, 4000);
+      }
+
+      // Handle attempt unblock
+      document
+        .getElementById("attempt-unblock")
+        .addEventListener("click", () => {
+          chrome.runtime.sendMessage({ action: "openPopup" }, (response) => {
+            if (chrome.runtime.lastError) {
+              alert(
+                "Please click the Simple Site Blocker extension icon to attempt unblocking",
+              );
+            }
+          });
+        });
+
+      // Handle new quote
+      document.getElementById("new-quote").addEventListener("click", () => {
+        updateQuote();
       });
 
-      // Close modal when clicking outside
-      document.getElementById("note-modal").addEventListener("click", (e) => {
-        if (e.target === document.getElementById("note-modal")) {
-          document.getElementById("cancel-note").click();
-        }
+      // Auto-focus on text area when page loads
+      document.addEventListener("DOMContentLoaded", () => {
+        document.getElementById("distraction-input").focus();
       });
 
       // Initialize page
       updateBlockedPage();
+      updateQuote(); // Show a random quote on load
     </script>
 
     <style>
-      .modal {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.5);
+      /* Custom styles for blocked page */
+      body {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        margin: 0;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
+
+      .blocked-container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 40px 20px;
+        min-height: 100vh;
         display: flex;
+        flex-direction: column;
         justify-content: center;
         align-items: center;
-        z-index: 1000;
+        text-align: center;
       }
 
-      .modal-content {
-        background: white;
+      /* Quote Section */
+      .quote-section {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 15px;
         padding: 30px;
-        border-radius: 8px;
+        margin-bottom: 30px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
         max-width: 500px;
-        width: 90%;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        width: 100%;
       }
 
-      .modal-content h3 {
+      .quote-icon {
+        font-size: 24px;
         margin-bottom: 15px;
+      }
+
+      .quote-text {
+        font-size: 18px;
+        font-style: italic;
         color: #2c3e50;
+        margin: 0 0 15px 0;
+        line-height: 1.6;
+        quotes: none;
       }
 
-      .modal-content p {
+      .quote-author {
+        font-size: 14px;
+        color: #7f8c8d;
+        font-weight: 600;
+      }
+
+      /* Main Content */
+      .main-content {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 15px;
+        padding: 25px;
+        margin-bottom: 25px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        max-width: 500px;
+        width: 100%;
+      }
+
+      .blocked-title {
+        color: #2c3e50;
+        font-size: 28px;
         margin-bottom: 15px;
+        font-weight: 700;
+      }
+
+      .blocked-message {
+        color: #34495e;
+        font-size: 16px;
+        margin-bottom: 20px;
+        line-height: 1.5;
+      }
+
+      .blocked-time {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 10px;
+        border: 2px solid #e74c3c;
+        font-size: 16px;
+      }
+
+      .blocked-time strong {
+        color: #e74c3c;
+      }
+
+      #countdown {
+        font-family: "Courier New", monospace;
+        font-size: 20px;
+        font-weight: bold;
+        color: #e74c3c;
+      }
+
+      /* Distraction Section */
+      .distraction-section {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 15px;
+        padding: 25px;
+        margin-bottom: 25px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        max-width: 500px;
+        width: 100%;
+      }
+
+      .distraction-section h3 {
+        color: #2c3e50;
+        margin-bottom: 10px;
+        font-size: 20px;
+      }
+
+      .distraction-section p {
         color: #555;
+        margin-bottom: 15px;
+        font-size: 14px;
       }
 
       #distraction-input {
         width: 100%;
-        padding: 10px;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        font-size: 14px;
-        min-height: 80px;
-        resize: vertical;
+        padding: 15px;
+        border: 2px solid #ddd;
+        border-radius: 10px;
+        font-size: 16px;
         font-family: inherit;
-        margin-bottom: 20px;
+        margin-bottom: 15px;
+        resize: vertical;
+        transition: border-color 0.3s;
+        box-sizing: border-box;
       }
 
-      .modal-actions {
+      #distraction-input:focus {
+        outline: none;
+        border-color: #3498db;
+        box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+      }
+
+      .save-btn {
+        background: #27ae60;
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color 0.3s;
+        width: 100%;
+      }
+
+      .save-btn:hover {
+        background: #229954;
+      }
+
+      .save-feedback {
+        margin-top: 10px;
+        padding: 10px;
+        border-radius: 6px;
+        font-weight: 600;
+        transition: opacity 0.3s;
+      }
+
+      .save-feedback.success {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+      }
+
+      .save-feedback.error {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+      }
+
+      /* Secondary Actions */
+      .secondary-actions {
         display: flex;
-        gap: 10px;
-        justify-content: flex-end;
+        gap: 15px;
+        margin-bottom: 25px;
+        flex-wrap: wrap;
+        justify-content: center;
+        max-width: 500px;
+        width: 100%;
       }
 
-      .blocked-footer {
-        margin-top: 40px;
-        padding-top: 20px;
-        border-top: 1px solid #eee;
-        color: #666;
-      }
-
-      .blocked-footer p {
-        margin: 0;
+      .action-btn {
+        padding: 12px 20px;
+        border: none;
+        border-radius: 8px;
         font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        flex: 1;
+        min-width: 200px;
+      }
+
+      .action-btn.secondary {
+        background: rgba(255, 255, 255, 0.9);
+        color: #34495e;
+        border: 2px solid #34495e;
+      }
+
+      .action-btn.secondary:hover {
+        background: #34495e;
+        color: white;
+      }
+
+      .action-btn.tertiary {
+        background: rgba(255, 255, 255, 0.7);
+        color: #7f8c8d;
+        border: 1px solid #bdc3c7;
+      }
+
+      .action-btn.tertiary:hover {
+        background: rgba(255, 255, 255, 0.9);
+        color: #34495e;
+      }
+
+      /* Footer */
+      .footer-tip {
+        background: rgba(255, 255, 255, 0.8);
+        border-radius: 10px;
+        padding: 15px;
+        max-width: 500px;
+        width: 100%;
+      }
+
+      .footer-tip p {
+        margin: 0;
+        color: #34495e;
+        font-size: 14px;
+      }
+
+      .hidden {
+        display: none;
+      }
+
+      /* Responsive design */
+      @media (max-width: 768px) {
+        .blocked-container {
+          padding: 20px 15px;
+        }
+
+        .quote-section,
+        .main-content,
+        .distraction-section {
+          padding: 20px;
+        }
+
+        .action-btn {
+          min-width: 100%;
+        }
+
+        .secondary-actions {
+          flex-direction: column;
+        }
       }
     </style>
   </body>
