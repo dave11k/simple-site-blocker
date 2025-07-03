@@ -95,5 +95,5 @@ Thumbs.db
 *.log
 
 # Keep project documentation
-!CLAUDE.md
-!project_info.md
+CLAUDE.md
+project_info.md
