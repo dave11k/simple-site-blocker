@@ -8,7 +8,9 @@
     "activeTab",
     "alarms",
     "declarativeNetRequest",
-    "declarativeNetRequestWithHostAccess"
+    "declarativeNetRequestWithHostAccess",
+    "declarativeNetRequestFeedback",
+    "tabs"
   ],
   "host_permissions": ["<all_urls>"],
   "background": {

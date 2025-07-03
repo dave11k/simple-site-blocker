@@ -26,6 +26,57 @@ chrome.runtime.onInstalled.addListener(async () => {
   await initializeExtension();
 });
 
+// Add logging for when rules are triggered
+chrome.declarativeNetRequest.onRuleMatchedDebug.addListener((details) => {
+  console.log("🚫 Rule matched and triggered:", {
+    url: details.request.url,
+    ruleId: details.rule.ruleId,
+    tabId: details.request.tabId,
+    type: details.request.type,
+    method: details.request.method,
+    timestamp: new Date().toISOString(),
+  });
+});
+
+// Add logging for tab navigation attempts
+chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
+  if (changeInfo.url && changeInfo.status === "loading") {
+    console.log("🌐 Tab navigation detected:", {
+      tabId: tabId,
+      url: changeInfo.url,
+      status: changeInfo.status,
+      timestamp: new Date().toISOString(),
+    });
+
+    // Check if this URL should be blocked
+    const blockingState = await getBlockingState();
+    if (blockingState.isBlocking && blockingState.blockedSites.length > 0) {
+      const hostname = new URL(changeInfo.url).hostname.toLowerCase();
+      const shouldBlock = blockingState.blockedSites.some((site) => {
+        const cleanSite = site
+          .toLowerCase()
+          .replace(/^www\./, "")
+          .replace(/^https?:\/\//, "")
+          .replace(/\/$/, "");
+        return (
+          hostname === cleanSite ||
+          hostname === `www.${cleanSite}` ||
+          hostname.endsWith(`.${cleanSite}`)
+        );
+      });
+
+      if (shouldBlock) {
+        console.log("⚠️ URL should be blocked but tab navigation detected:", {
+          url: changeInfo.url,
+          hostname: hostname,
+          blockedSites: blockingState.blockedSites,
+          shouldBlock: shouldBlock,
+        });
+      }
+    }
+  }
+});
+
 // Initialize extension with default values
 async function initializeExtension() {
   try {
@@ -114,10 +165,11 @@ async function updateBlockingRules(sites) {
     }
 
     if (!sites || sites.length === 0) {
+      console.log("ℹ️ No sites to block, clearing all rules");
       return; // No sites to block
     }
 
-    // Create new blocking rules
+    // Create new blocking rules with comprehensive coverage
     const rules = [];
     sites.forEach((site, index) => {
       const cleanSite = site
@@ -126,11 +178,11 @@ async function updateBlockingRules(sites) {
         .replace(/^https?:\/\//, "")
         .replace(/\/$/, ""); // Remove trailing slash
 
-      console.log(`Creating rules for site: ${cleanSite}`);
+      console.log(`🔧 Creating comprehensive rules for site: ${cleanSite}`);
 
-      // Rule 1: Block exact domain with HTTP
+      // Rule 1: Block exact domain with HTTP and any path
       rules.push({
-        id: index * 6 + 1,
+        id: index * 10 + 1,
         priority: 1,
         action: {
           type: "redirect",
@@ -144,9 +196,9 @@ async function updateBlockingRules(sites) {
         },
       });
 
-      // Rule 2: Block exact domain with HTTPS
+      // Rule 2: Block exact domain with HTTPS and any path
       rules.push({
-        id: index * 6 + 2,
+        id: index * 10 + 2,
         priority: 1,
         action: {
           type: "redirect",
@@ -160,9 +212,9 @@ async function updateBlockingRules(sites) {
         },
       });
 
-      // Rule 3: Block www subdomain with HTTP
+      // Rule 3: Block www subdomain with HTTP and any path
       rules.push({
-        id: index * 6 + 3,
+        id: index * 10 + 3,
         priority: 1,
         action: {
           type: "redirect",
@@ -176,9 +228,9 @@ async function updateBlockingRules(sites) {
         },
       });
 
-      // Rule 4: Block www subdomain with HTTPS
+      // Rule 4: Block www subdomain with HTTPS and any path
       rules.push({
-        id: index * 6 + 4,
+        id: index * 10 + 4,
         priority: 1,
         action: {
           type: "redirect",
@@ -192,9 +244,9 @@ async function updateBlockingRules(sites) {
         },
       });
 
-      // Rule 5: Block exact domain without path (root)
+      // Rule 5: Block exact domain without path (root) HTTP
       rules.push({
-        id: index * 6 + 5,
+        id: index * 10 + 5,
         priority: 1,
         action: {
           type: "redirect",
@@ -203,14 +255,14 @@ async function updateBlockingRules(sites) {
           },
         },
         condition: {
-          urlFilter: `*://${cleanSite}`,
+          urlFilter: `http://${cleanSite}`,
           resourceTypes: ["main_frame"],
         },
       });
 
-      // Rule 6: Block www version without path (root)
+      // Rule 6: Block exact domain without path (root) HTTPS
       rules.push({
-        id: index * 6 + 6,
+        id: index * 10 + 6,
         priority: 1,
         action: {
           type: "redirect",
@@ -219,14 +271,88 @@ async function updateBlockingRules(sites) {
           },
         },
         condition: {
-          urlFilter: `*://www.${cleanSite}`,
+          urlFilter: `https://${cleanSite}`,
+          resourceTypes: ["main_frame"],
+        },
+      });
+
+      // Rule 7: Block www version without path (root) HTTP
+      rules.push({
+        id: index * 10 + 7,
+        priority: 1,
+        action: {
+          type: "redirect",
+          redirect: {
+            url: chrome.runtime.getURL("blocked.html"),
+          },
+        },
+        condition: {
+          urlFilter: `http://www.${cleanSite}`,
+          resourceTypes: ["main_frame"],
+        },
+      });
+
+      // Rule 8: Block www version without path (root) HTTPS
+      rules.push({
+        id: index * 10 + 8,
+        priority: 1,
+        action: {
+          type: "redirect",
+          redirect: {
+            url: chrome.runtime.getURL("blocked.html"),
+          },
+        },
+        condition: {
+          urlFilter: `https://www.${cleanSite}`,
+          resourceTypes: ["main_frame"],
+        },
+      });
+
+      // Rule 9: Block using requestDomains (alternative approach)
+      rules.push({
+        id: index * 10 + 9,
+        priority: 1,
+        action: {
+          type: "redirect",
+          redirect: {
+            url: chrome.runtime.getURL("blocked.html"),
+          },
+        },
+        condition: {
+          requestDomains: [cleanSite],
+          resourceTypes: ["main_frame"],
+        },
+      });
+
+      // Rule 10: Block using requestDomains with www
+      rules.push({
+        id: index * 10 + 10,
+        priority: 1,
+        action: {
+          type: "redirect",
+          redirect: {
+            url: chrome.runtime.getURL("blocked.html"),
+          },
+        },
+        condition: {
+          requestDomains: [`www.${cleanSite}`],
           resourceTypes: ["main_frame"],
         },
       });
     });
 
-    console.log(`Adding ${rules.length} blocking rules for sites:`, sites);
-    console.log("Rule details:", rules);
+    console.log(
+      `📝 Adding ${rules.length} comprehensive blocking rules for sites:`,
+      sites,
+    );
+    console.log(
+      "🔍 Rule details:",
+      rules.map((r) => ({
+        id: r.id,
+        urlFilter: r.condition.urlFilter,
+        requestDomains: r.condition.requestDomains,
+      })),
+    );
 
     // Add the new rules
     await chrome.declarativeNetRequest.updateDynamicRules({
@@ -237,10 +363,14 @@ async function updateBlockingRules(sites) {
     const addedRules = await chrome.declarativeNetRequest.getDynamicRules();
     console.log(
       `✅ Successfully added ${addedRules.length} dynamic rules`,
-      addedRules,
+      addedRules.map((r) => ({
+        id: r.id,
+        urlFilter: r.condition.urlFilter,
+        requestDomains: r.condition.requestDomains,
+      })),
     );
   } catch (error) {
-    console.error("Failed to update blocking rules:", error);
+    console.error("❌ Failed to update blocking rules:", error);
   }
 }
 

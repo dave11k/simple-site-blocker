@@ -312,19 +312,64 @@ async function loadStatistics() {
   }
 }
 
-// Reset statistics
+// Clear all extension data (for development purposes)
 async function resetStatistics() {
-  if (!confirm("Are you sure you want to reset all statistics?")) {
+  if (
+    !confirm(
+      "⚠️ WARNING: This will clear ALL extension data including profiles, settings, notes, and any active blocking sessions.\n\nThis action cannot be undone. Are you sure you want to proceed?",
+    )
+  ) {
     return;
   }
 
   try {
-    // Reset statistics (placeholder for now)
-    await loadStatistics();
-    showNotification("Statistics reset", "success");
+    // Clear all extension storage keys
+    const keysToRemove = [
+      "blockingState",
+      "profiles",
+      "mathDifficulty",
+      "distractionNotes",
+      "mathChallengeState",
+    ];
+
+    // Clear each storage key
+    await new Promise((resolve) => {
+      chrome.storage.local.remove(keysToRemove, resolve);
+    });
+
+    // Also clear any blocking rules that might be active
+    try {
+      const existingRules =
+        await chrome.declarativeNetRequest.getDynamicRules();
+      if (existingRules.length > 0) {
+        const ruleIdsToRemove = existingRules.map((rule) => rule.id);
+        await chrome.declarativeNetRequest.updateDynamicRules({
+          removeRuleIds: ruleIdsToRemove,
+        });
+      }
+    } catch (ruleError) {
+      console.warn("Could not clear blocking rules:", ruleError);
+    }
+
+    // Clear any active alarms
+    try {
+      await chrome.alarms.clear("blockingTimer");
+    } catch (alarmError) {
+      console.warn("Could not clear alarms:", alarmError);
+    }
+
+    // Reload the page data to show empty state
+    await initializeOptionsPage();
+
+    showNotification(
+      "🧹 All extension data cleared successfully! Extension reset to clean state.",
+      "success",
+    );
+
+    console.log("🔄 Extension data cleared - clean slate for testing");
   } catch (error) {
-    console.error("Failed to reset statistics:", error);
-    showNotification("Failed to reset statistics", "error");
+    console.error("Failed to clear extension data:", error);
+    showNotification("❌ Failed to clear all extension data", "error");
   }
 }
 

@@ -30,7 +30,9 @@
       "Bash(node:*)",
       "Bash(timeout:*)",
       "Bash(git config:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "mcp__browser-tools__getConsoleLogs",
+      "mcp__browser-tools__getConsoleErrors"
     ],
     "deny": []
   }
