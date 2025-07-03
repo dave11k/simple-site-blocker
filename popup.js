@@ -1,4 +1,4 @@
-// Focus Buddy Popup Script
+// Simple Site Blocker Popup Script
 
 document.addEventListener("DOMContentLoaded", async () => {
   await initializePopup();

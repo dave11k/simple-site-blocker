@@ -1,4 +1,4 @@
-// Focus Buddy Options Page Script
+// Simple Site Blocker Options Page Script
 
 let currentEditingProfile = null;
 

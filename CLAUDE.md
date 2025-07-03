@@ -8,7 +8,7 @@
 
 ### Project-Specific Instructions
 
-- This is a Chrome extension project for a website blocker called "Focus Buddy"
+- This is a Chrome extension project for a website blocker called "Simple Site Blocker"
 - The extension blocks websites for specified durations and requires solving math problems to unblock early
 - Test the extension by loading it in Chrome's developer mode after building
 - Never assume the extension is running - always build and reload when testing

@@ -4,7 +4,7 @@ This document outlines the plan for developing a Chrome extension that allows us
 
 ### 1. Project Overview
 
-The "Focus Buddy" (or similar name) Chrome extension aims to help users improve their productivity by temporarily blocking distracting websites. It incorporates a unique "math challenge" mechanism to deter impulsive unblocking, encouraging users to stick to their focus goals.
+The "Simple Site Blocker" Chrome extension aims to help users improve their productivity by temporarily blocking distracting websites. It incorporates a unique "math challenge" mechanism to deter impulsive unblocking, encouraging users to stick to their focus goals.
 
 ### 2. Core Features
 
@@ -143,7 +143,7 @@ The Chrome Storage API (`chrome.storage.local`) will be used to persist user dat
 **5.3. Blocked Page UI (`blocked.html`)**
 
 - A simple HTML page informing the user that the site is blocked.
-- Displays the reason (e.g., "This site is currently blocked by Focus Buddy until [End Time]").
+- Displays the reason (e.g., "This site is currently blocked by Simple Site Blocker until [End Time]").
 - Optional: A button to "Attempt Unblock" which would open the popup to initiate the math challenge.
 
 ### 6. Core Logic

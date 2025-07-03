@@ -1,4 +1,4 @@
-// Focus Buddy Chrome Extension Background Script
+// Simple Site Blocker Chrome Extension Background Script
 
 // Storage keys
 const STORAGE_KEYS = {

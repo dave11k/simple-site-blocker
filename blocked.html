@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Site Blocked - Focus Buddy</title>
+    <title>Site Blocked - Simple Site Blocker</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
@@ -11,7 +11,7 @@
       <div class="blocked-icon">🚫</div>
       <h1 class="blocked-title">Site Blocked</h1>
       <p class="blocked-message">
-        This website has been blocked by Focus Buddy to help you stay
+        This website has been blocked by Simple Site Blocker to help you stay
         focused.<br />
         The blocking session will automatically end at the scheduled time.
       </p>
@@ -119,7 +119,7 @@
           chrome.runtime.sendMessage({ action: "openPopup" }, (response) => {
             if (chrome.runtime.lastError) {
               alert(
-                "Please click the Focus Buddy extension icon to attempt unblocking",
+                "Please click the Simple Site Blocker extension icon to attempt unblocking",
               );
             }
           });

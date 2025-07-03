@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "Focus Buddy",
+  "name": "Simple Site Blocker",
   "version": "1.0.0",
   "description": "A Chrome extension that blocks websites for specified durations with math challenges for early unblocking",
   "permissions": [
@@ -16,7 +16,7 @@
   },
   "action": {
     "default_popup": "popup.html",
-    "default_title": "Focus Buddy"
+    "default_title": "Simple Site Blocker"
   },
   "options_page": "options.html",
   "web_accessible_resources": [

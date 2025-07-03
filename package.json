@@ -1,5 +1,5 @@
 {
-  "name": "focus-buddy",
+  "name": "simple-site-blocker",
   "version": "1.0.0",
   "description": "A Chrome extension that blocks websites for specified durations with math challenges for early unblocking",
   "scripts": {
