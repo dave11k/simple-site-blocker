@@ -32,10 +32,10 @@ function setupEventListeners() {
     .getElementById("profile-form-element")
     .addEventListener("submit", saveProfile);
 
-  // Math difficulty
-  document
-    .getElementById("save-difficulty")
-    .addEventListener("click", saveDifficulty);
+  // Math difficulty - auto-save on change
+  document.querySelectorAll('input[name="difficulty"]').forEach((radio) => {
+    radio.addEventListener("change", saveDifficulty);
+  });
 
   // Distraction notes
   document
@@ -46,6 +46,14 @@ function setupEventListeners() {
   document
     .getElementById("reset-stats")
     .addEventListener("click", resetStatistics);
+
+  // Modal event listeners
+  document
+    .getElementById("edit-profile-form")
+    .addEventListener("submit", handleEditProfileSubmit);
+  document
+    .getElementById("confirm-delete")
+    .addEventListener("click", handleDeleteConfirmation);
 }
 
 // Load and display profiles
@@ -113,7 +121,7 @@ function hideProfileForm() {
   currentEditingProfile = null;
 }
 
-// Edit profile
+// Edit profile using modal
 async function editProfile(profileId) {
   try {
     const profiles = (await getStorageData("profiles")) || [];
@@ -124,30 +132,44 @@ async function editProfile(profileId) {
       return;
     }
 
+    // Set current editing profile
     currentEditingProfile = profile;
-    document.getElementById("profile-name").value = profile.name;
-    document.getElementById("profile-sites").value = profile.sites.join("\n");
-    showProfileForm(true);
+
+    // Populate modal fields
+    document.getElementById("edit-profile-name").value = profile.name;
+    document.getElementById("edit-profile-sites").value =
+      profile.sites.join("\n");
+
+    // Show modal
+    document.getElementById("edit-profile-modal").classList.remove("hidden");
   } catch (error) {
     showNotification("Failed to load profile for editing", "error");
   }
 }
 
-// Delete profile
+// Delete profile using modal
 async function deleteProfile(profileId) {
-  if (!confirm("Are you sure you want to delete this profile?")) {
-    return;
-  }
-
   try {
     const profiles = (await getStorageData("profiles")) || [];
-    const updatedProfiles = profiles.filter((p) => p.id !== profileId);
+    const profile = profiles.find((p) => p.id === profileId);
 
-    await setStorageData("profiles", updatedProfiles);
-    await loadProfiles();
-    showNotification("Profile deleted successfully", "success");
+    if (!profile) {
+      showNotification("Profile not found", "error");
+      return;
+    }
+
+    // Set the profile name in the modal
+    document.getElementById("delete-profile-name").textContent = profile.name;
+
+    // Store the profile ID for confirmation
+    document
+      .getElementById("confirm-delete")
+      .setAttribute("data-profile-id", profileId);
+
+    // Show modal
+    document.getElementById("delete-profile-modal").classList.remove("hidden");
   } catch (error) {
-    showNotification("Failed to delete profile", "error");
+    showNotification("Failed to load profile for deletion", "error");
   }
 }
 
@@ -168,7 +190,7 @@ async function saveProfile(event) {
       .split("\n")
       .map((site) => site.trim())
       .filter((site) => site.length > 0)
-      .map((site) => site.replace(/^https?:\/\//, "").replace(/^www\./, ""));
+      .map((site) => cleanWebsiteURL(site));
 
     if (sites.length === 0) {
       showNotification("Please enter at least one website", "error");
@@ -218,14 +240,25 @@ async function loadDifficultySetting() {
   } catch (error) {}
 }
 
-// Save difficulty setting
+// Save difficulty setting (auto-save)
 async function saveDifficulty() {
   try {
     const difficulty = document.querySelector(
       'input[name="difficulty"]:checked',
     ).value;
     await setStorageData("mathDifficulty", difficulty);
-    showNotification("Difficulty setting saved", "success");
+
+    // Show subtle success indication
+    const difficultyLabels = {
+      easy: "Easy (3 problems)",
+      medium: "Medium (5 problems)",
+      hard: "Hard (7 problems)",
+    };
+
+    showNotification(
+      `Math difficulty set to ${difficultyLabels[difficulty]}`,
+      "success",
+    );
   } catch (error) {
     showNotification("Failed to save difficulty setting", "error");
   }
@@ -354,6 +387,126 @@ async function resetStatistics() {
   }
 }
 
+// Modal control functions
+function closeEditModal() {
+  document.getElementById("edit-profile-modal").classList.add("hidden");
+  document.getElementById("edit-profile-name").value = "";
+  document.getElementById("edit-profile-sites").value = "";
+  currentEditingProfile = null;
+}
+
+function closeDeleteModal() {
+  document.getElementById("delete-profile-modal").classList.add("hidden");
+  document.getElementById("confirm-delete").removeAttribute("data-profile-id");
+}
+
+// Handle edit profile form submission
+async function handleEditProfileSubmit(event) {
+  event.preventDefault();
+
+  try {
+    const name = document.getElementById("edit-profile-name").value.trim();
+    const sitesText = document
+      .getElementById("edit-profile-sites")
+      .value.trim();
+
+    if (!name || !sitesText) {
+      showNotification("Please fill in all fields", "error");
+      return;
+    }
+
+    const sites = sitesText
+      .split("\n")
+      .map((site) => site.trim())
+      .filter((site) => site.length > 0)
+      .map((site) => cleanWebsiteURL(site));
+
+    if (sites.length === 0) {
+      showNotification("Please enter at least one website", "error");
+      return;
+    }
+
+    const profiles = (await getStorageData("profiles")) || [];
+    const index = profiles.findIndex((p) => p.id === currentEditingProfile.id);
+
+    if (index !== -1) {
+      profiles[index] = {
+        ...currentEditingProfile,
+        name: name,
+        sites: sites,
+      };
+
+      await setStorageData("profiles", profiles);
+      await loadProfiles();
+      closeEditModal();
+      showNotification("Profile updated successfully", "success");
+    } else {
+      showNotification("Profile not found", "error");
+    }
+  } catch (error) {
+    showNotification("Failed to update profile", "error");
+  }
+}
+
+// Handle delete confirmation
+async function handleDeleteConfirmation() {
+  try {
+    const profileId = document
+      .getElementById("confirm-delete")
+      .getAttribute("data-profile-id");
+
+    if (!profileId) {
+      showNotification("No profile selected", "error");
+      return;
+    }
+
+    const profiles = (await getStorageData("profiles")) || [];
+    const updatedProfiles = profiles.filter((p) => p.id !== profileId);
+
+    await setStorageData("profiles", updatedProfiles);
+    await loadProfiles();
+    closeDeleteModal();
+    showNotification("Profile deleted successfully", "success");
+  } catch (error) {
+    showNotification("Failed to delete profile", "error");
+  }
+}
+
+// URL cleaning function to handle user input formatting
+function cleanWebsiteURL(url) {
+  // Remove leading/trailing whitespace
+  let cleanedURL = url.trim();
+
+  // Handle empty string
+  if (!cleanedURL) return "";
+
+  // Remove protocol (http://, https://, ftp://, etc.)
+  cleanedURL = cleanedURL.replace(/^[a-zA-Z][a-zA-Z0-9+.-]*:\/\//, "");
+
+  // Remove www. prefix
+  cleanedURL = cleanedURL.replace(/^www\./, "");
+
+  // Remove trailing slash
+  cleanedURL = cleanedURL.replace(/\/$/, "");
+
+  // Remove path, query parameters, and fragments (keep only domain)
+  cleanedURL = cleanedURL.split("/")[0];
+  cleanedURL = cleanedURL.split("?")[0];
+  cleanedURL = cleanedURL.split("#")[0];
+
+  // Convert to lowercase for consistency
+  cleanedURL = cleanedURL.toLowerCase();
+
+  // Basic validation - check if it looks like a domain
+  if (cleanedURL && !cleanedURL.includes(".") && !cleanedURL.includes(":")) {
+    // If no dot and no port, it might be incomplete (like "facebook")
+    // We could suggest adding .com, but for now just return as-is
+    // The user might be entering localhost or similar
+  }
+
+  return cleanedURL;
+}
+
 // Utility functions
 async function getStorageData(key) {
   return new Promise((resolve) => {
@@ -459,3 +612,5 @@ document.head.appendChild(style);
 // Make functions available globally for inline event handlers
 window.editProfile = editProfile;
 window.deleteProfile = deleteProfile;
+window.closeEditModal = closeEditModal;
+window.closeDeleteModal = closeDeleteModal;

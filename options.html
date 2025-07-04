@@ -42,12 +42,10 @@
               <label for="profile-sites">Websites to Block:</label>
               <textarea
                 id="profile-sites"
-                placeholder="Enter one website per line:&#10;facebook.com&#10;twitter.com&#10;youtube.com&#10;instagram.com"
+                placeholder="Enter websites in any format:&#10;https://www.facebook.com&#10;twitter.com&#10;youtube.com/watch&#10;instagram.com"
                 required
               ></textarea>
-              <small
-                >Enter one website per line without 'http://' or 'www.'</small
-              >
+              <small>Enter one website per line</small>
             </div>
             <div class="form-actions">
               <button type="submit" class="primary-btn">Save Profile</button>
@@ -86,10 +84,6 @@
             </label>
           </div>
         </div>
-
-        <button id="save-difficulty" class="primary-btn">
-          Save Difficulty Setting
-        </button>
       </div>
 
       <!-- Distraction Notes -->
@@ -131,6 +125,77 @@
         <button id="reset-stats" class="danger-btn">
           🧹 Clear All Extension Data
         </button>
+      </div>
+    </div>
+
+    <!-- Edit Profile Modal -->
+    <div id="edit-profile-modal" class="modal hidden">
+      <div class="modal-overlay" onclick="closeEditModal()"></div>
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Edit Profile</h3>
+          <button class="modal-close" onclick="closeEditModal()">
+            &times;
+          </button>
+        </div>
+        <form id="edit-profile-form">
+          <div class="form-group">
+            <label for="edit-profile-name">Profile Name:</label>
+            <input
+              type="text"
+              id="edit-profile-name"
+              placeholder="Enter profile name"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label for="edit-profile-sites">Websites to Block:</label>
+            <textarea
+              id="edit-profile-sites"
+              placeholder="Enter websites in any format:&#10;https://www.facebook.com&#10;twitter.com&#10;youtube.com/watch&#10;instagram.com"
+              required
+            ></textarea>
+            <small>Enter one website per line</small>
+          </div>
+          <div class="modal-actions">
+            <button type="submit" class="primary-btn">Save Changes</button>
+            <button
+              type="button"
+              class="secondary-btn"
+              onclick="closeEditModal()"
+            >
+              Cancel
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Delete Profile Modal -->
+    <div id="delete-profile-modal" class="modal hidden">
+      <div class="modal-overlay" onclick="closeDeleteModal()"></div>
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Delete Profile</h3>
+          <button class="modal-close" onclick="closeDeleteModal()">
+            &times;
+          </button>
+        </div>
+        <div class="modal-body">
+          <p>
+            Are you sure you want to delete the profile "<strong
+              id="delete-profile-name"
+            ></strong
+            >"?
+          </p>
+          <p class="warning-text">This action cannot be undone.</p>
+        </div>
+        <div class="modal-actions">
+          <button id="confirm-delete" class="danger-btn">Delete Profile</button>
+          <button class="secondary-btn" onclick="closeDeleteModal()">
+            Cancel
+          </button>
+        </div>
       </div>
     </div>
 

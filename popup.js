@@ -123,7 +123,8 @@ async function startBlocking() {
       sites = manualSites
         .split("\n")
         .map((site) => site.trim())
-        .filter((site) => site.length > 0);
+        .filter((site) => site.length > 0)
+        .map((site) => cleanWebsiteURL(site));
     }
 
     if (sites.length === 0) {
@@ -336,6 +337,34 @@ function showError(message) {
 // Show success message
 function showSuccess(message) {
   // Simple success display - could be enhanced with better UI
+}
+
+// URL cleaning function to handle user input formatting
+function cleanWebsiteURL(url) {
+  // Remove leading/trailing whitespace
+  let cleanedURL = url.trim();
+
+  // Handle empty string
+  if (!cleanedURL) return "";
+
+  // Remove protocol (http://, https://, ftp://, etc.)
+  cleanedURL = cleanedURL.replace(/^[a-zA-Z][a-zA-Z0-9+.-]*:\/\//, "");
+
+  // Remove www. prefix
+  cleanedURL = cleanedURL.replace(/^www\./, "");
+
+  // Remove trailing slash
+  cleanedURL = cleanedURL.replace(/\/$/, "");
+
+  // Remove path, query parameters, and fragments (keep only domain)
+  cleanedURL = cleanedURL.split("/")[0];
+  cleanedURL = cleanedURL.split("?")[0];
+  cleanedURL = cleanedURL.split("#")[0];
+
+  // Convert to lowercase for consistency
+  cleanedURL = cleanedURL.toLowerCase();
+
+  return cleanedURL;
 }
 
 // Send message to background script
