@@ -130,13 +130,11 @@
 
     <!-- Edit Profile Modal -->
     <div id="edit-profile-modal" class="modal hidden">
-      <div class="modal-overlay" onclick="closeEditModal()"></div>
+      <div class="modal-overlay"></div>
       <div class="modal-content">
         <div class="modal-header">
           <h3>Edit Profile</h3>
-          <button class="modal-close" onclick="closeEditModal()">
-            &times;
-          </button>
+          <button class="modal-close" data-action="close-edit">&times;</button>
         </div>
         <form id="edit-profile-form">
           <div class="form-group">
@@ -162,7 +160,7 @@
             <button
               type="button"
               class="secondary-btn"
-              onclick="closeEditModal()"
+              data-action="close-edit"
             >
               Cancel
             </button>
@@ -173,11 +171,11 @@
 
     <!-- Delete Profile Modal -->
     <div id="delete-profile-modal" class="modal hidden">
-      <div class="modal-overlay" onclick="closeDeleteModal()"></div>
+      <div class="modal-overlay"></div>
       <div class="modal-content">
         <div class="modal-header">
           <h3>Delete Profile</h3>
-          <button class="modal-close" onclick="closeDeleteModal()">
+          <button class="modal-close" data-action="close-delete">
             &times;
           </button>
         </div>
@@ -192,7 +190,69 @@
         </div>
         <div class="modal-actions">
           <button id="confirm-delete" class="danger-btn">Delete Profile</button>
-          <button class="secondary-btn" onclick="closeDeleteModal()">
+          <button class="secondary-btn" data-action="close-delete">
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Clear Notes Modal -->
+    <div id="clear-notes-modal" class="modal hidden">
+      <div class="modal-overlay"></div>
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Clear All Notes</h3>
+          <button class="modal-close" data-action="close-clear-notes">
+            &times;
+          </button>
+        </div>
+        <div class="modal-body">
+          <p>Are you sure you want to clear all distraction notes?</p>
+          <p class="warning-text">This action cannot be undone.</p>
+        </div>
+        <div class="modal-actions">
+          <button id="confirm-clear-notes" class="danger-btn">
+            Clear All Notes
+          </button>
+          <button class="secondary-btn" data-action="close-clear-notes">
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Clear Extension Data Modal -->
+    <div id="clear-data-modal" class="modal hidden">
+      <div class="modal-overlay"></div>
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Clear All Extension Data</h3>
+          <button class="modal-close" data-action="close-clear-data">
+            &times;
+          </button>
+        </div>
+        <div class="modal-body">
+          <p>
+            ⚠️ <strong>WARNING:</strong> This will clear ALL extension data
+            including:
+          </p>
+          <ul style="margin: 15px 0; padding-left: 20px; color: #495057">
+            <li>All blocking profiles</li>
+            <li>Settings and preferences</li>
+            <li>Distraction notes</li>
+            <li>Any active blocking sessions</li>
+          </ul>
+          <p class="warning-text">
+            This action cannot be undone and will reset the extension to its
+            initial state.
+          </p>
+        </div>
+        <div class="modal-actions">
+          <button id="confirm-clear-data" class="danger-btn">
+            Clear All Data
+          </button>
+          <button class="secondary-btn" data-action="close-clear-data">
             Cancel
           </button>
         </div>

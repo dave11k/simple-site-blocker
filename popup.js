@@ -202,11 +202,14 @@ function updateBlockedSitesList(sites) {
   const list = document.getElementById("blocked-sites-list");
   list.innerHTML = "";
 
-  sites.forEach((site) => {
-    const li = document.createElement("li");
-    li.textContent = site;
-    list.appendChild(li);
-  });
+  // Check if sites is defined and is an array
+  if (sites && Array.isArray(sites)) {
+    sites.forEach((site) => {
+      const li = document.createElement("li");
+      li.textContent = site;
+      list.appendChild(li);
+    });
+  }
 }
 
 // Start countdown timer

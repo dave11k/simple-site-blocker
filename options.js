@@ -40,12 +40,12 @@ function setupEventListeners() {
   // Distraction notes
   document
     .getElementById("clear-notes")
-    .addEventListener("click", clearAllNotes);
+    .addEventListener("click", showClearNotesModal);
 
   // Statistics
   document
     .getElementById("reset-stats")
-    .addEventListener("click", resetStatistics);
+    .addEventListener("click", showClearDataModal);
 
   // Modal event listeners
   document
@@ -54,6 +54,50 @@ function setupEventListeners() {
   document
     .getElementById("confirm-delete")
     .addEventListener("click", handleDeleteConfirmation);
+  document
+    .getElementById("confirm-clear-notes")
+    .addEventListener("click", handleClearNotesConfirmation);
+  document
+    .getElementById("confirm-clear-data")
+    .addEventListener("click", handleClearDataConfirmation);
+
+  // Profile button event delegation
+  document.getElementById("profile-list").addEventListener("click", (event) => {
+    if (event.target.classList.contains("edit-btn")) {
+      const profileId = event.target.getAttribute("data-profile-id");
+      editProfile(profileId);
+    } else if (event.target.classList.contains("delete-btn")) {
+      const profileId = event.target.getAttribute("data-profile-id");
+      deleteProfile(profileId);
+    }
+  });
+
+  // Modal close event delegation
+  document.addEventListener("click", (event) => {
+    const action = event.target.getAttribute("data-action");
+    if (action === "close-edit") {
+      closeEditModal();
+    } else if (action === "close-delete") {
+      closeDeleteModal();
+    } else if (action === "close-clear-notes") {
+      closeClearNotesModal();
+    } else if (action === "close-clear-data") {
+      closeClearDataModal();
+    }
+
+    // Close modal when clicking overlay
+    if (event.target.classList.contains("modal-overlay")) {
+      if (event.target.closest("#edit-profile-modal")) {
+        closeEditModal();
+      } else if (event.target.closest("#delete-profile-modal")) {
+        closeDeleteModal();
+      } else if (event.target.closest("#clear-notes-modal")) {
+        closeClearNotesModal();
+      } else if (event.target.closest("#clear-data-modal")) {
+        closeClearDataModal();
+      }
+    }
+  });
 }
 
 // Load and display profiles
@@ -92,8 +136,8 @@ function createProfileElement(profile) {
               .join(", ")}${profile.sites.length > 3 ? "..." : ""}</p>
         </div>
         <div class="profile-actions">
-            <button class="edit-btn" onclick="editProfile('${profile.id}')">Edit</button>
-            <button class="delete-btn" onclick="deleteProfile('${profile.id}')">Delete</button>
+            <button class="edit-btn" data-profile-id="${profile.id}">Edit</button>
+            <button class="delete-btn" data-profile-id="${profile.id}">Delete</button>
         </div>
     `;
   return div;
@@ -306,15 +350,22 @@ function createNoteElement(note) {
   return div;
 }
 
-// Clear all notes
-async function clearAllNotes() {
-  if (!confirm("Are you sure you want to clear all distraction notes?")) {
-    return;
-  }
+// Show clear notes modal
+function showClearNotesModal() {
+  document.getElementById("clear-notes-modal").classList.remove("hidden");
+}
 
+// Close clear notes modal
+function closeClearNotesModal() {
+  document.getElementById("clear-notes-modal").classList.add("hidden");
+}
+
+// Handle clear notes confirmation
+async function handleClearNotesConfirmation() {
   try {
     await setStorageData("distractionNotes", []);
     await loadDistractionNotes();
+    closeClearNotesModal();
     showNotification("All notes cleared", "success");
   } catch (error) {
     showNotification("Failed to clear notes", "error");
@@ -333,16 +384,18 @@ async function loadStatistics() {
   } catch (error) {}
 }
 
-// Clear all extension data (for development purposes)
-async function resetStatistics() {
-  if (
-    !confirm(
-      "⚠️ WARNING: This will clear ALL extension data including profiles, settings, notes, and any active blocking sessions.\n\nThis action cannot be undone. Are you sure you want to proceed?",
-    )
-  ) {
-    return;
-  }
+// Show clear data modal
+function showClearDataModal() {
+  document.getElementById("clear-data-modal").classList.remove("hidden");
+}
 
+// Close clear data modal
+function closeClearDataModal() {
+  document.getElementById("clear-data-modal").classList.add("hidden");
+}
+
+// Handle clear data confirmation
+async function handleClearDataConfirmation() {
   try {
     // Clear all extension storage keys
     const keysToRemove = [
@@ -377,6 +430,7 @@ async function resetStatistics() {
 
     // Reload the page data to show empty state
     await initializeOptionsPage();
+    closeClearDataModal();
 
     showNotification(
       "🧹 All extension data cleared successfully! Extension reset to clean state.",
@@ -609,8 +663,4 @@ style.textContent = `
 `;
 document.head.appendChild(style);
 
-// Make functions available globally for inline event handlers
-window.editProfile = editProfile;
-window.deleteProfile = deleteProfile;
-window.closeEditModal = closeEditModal;
-window.closeDeleteModal = closeDeleteModal;
+// Functions are no longer needed globally since we use proper event listeners
