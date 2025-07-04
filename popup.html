@@ -14,15 +14,30 @@
       <div id="initial-state">
         <div class="section">
           <h3>Block Duration</h3>
-          <div class="time-inputs">
-            <label>
-              Hours:
-              <input type="number" id="hours" min="0" max="23" value="0" />
-            </label>
-            <label>
-              Minutes:
-              <input type="number" id="minutes" min="1" max="59" value="30" />
-            </label>
+          <div class="timer-input">
+            <div class="timer-display">
+              <input
+                type="number"
+                id="hours"
+                min="0"
+                max="23"
+                value="0"
+                class="time-digit"
+              />
+              <span class="time-separator">:</span>
+              <input
+                type="number"
+                id="minutes"
+                min="1"
+                max="59"
+                value="30"
+                class="time-digit"
+              />
+            </div>
+            <div class="timer-labels">
+              <span>hours</span>
+              <span>minutes</span>
+            </div>
           </div>
         </div>
 
