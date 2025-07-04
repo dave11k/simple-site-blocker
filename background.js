@@ -507,8 +507,8 @@ function generateMathProblem(difficulty) {
 function generateEasyProblem() {
   const operations = ["+", "-"];
   const op = operations[Math.floor(Math.random() * operations.length)];
-  let num1 = Math.floor(Math.random() * 10);
-  let num2 = Math.floor(Math.random() * 10);
+  let num1 = Math.floor(Math.random() * 90) + 10; // 2-digit numbers (10-99)
+  let num2 = Math.floor(Math.random() * 90) + 10; // 2-digit numbers (10-99)
 
   // Ensure subtraction results in positive numbers
   if (op === "-" && num1 < num2) {
@@ -529,11 +529,11 @@ function generateMediumProblem() {
   let num1, num2;
 
   if (op === "*") {
-    num1 = Math.floor(Math.random() * 10) + 1;
-    num2 = Math.floor(Math.random() * 10) + 1;
+    num1 = Math.floor(Math.random() * 90) + 10; // 2-digit for multiplication
+    num2 = Math.floor(Math.random() * 90) + 10; // 2-digit for multiplication
   } else {
-    num1 = Math.floor(Math.random() * 90) + 10;
-    num2 = Math.floor(Math.random() * 90) + 10;
+    num1 = Math.floor(Math.random() * 900) + 100; // 3-digit numbers (100-999)
+    num2 = Math.floor(Math.random() * 900) + 100; // 3-digit numbers (100-999)
   }
 
   // Ensure subtraction results in positive numbers
