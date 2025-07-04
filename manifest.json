@@ -1,16 +1,13 @@
 {
   "manifest_version": 3,
   "name": "Simple Site Blocker",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A Chrome extension that blocks websites for specified durations with math challenges for early unblocking",
   "permissions": [
     "storage",
-    "activeTab",
     "alarms",
     "declarativeNetRequest",
-    "declarativeNetRequestWithHostAccess",
-    "declarativeNetRequestFeedback",
-    "tabs"
+    "declarativeNetRequestWithHostAccess"
   ],
   "host_permissions": ["<all_urls>"],
   "background": {
