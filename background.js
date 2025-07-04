@@ -26,28 +26,11 @@ chrome.runtime.onInstalled.addListener(async () => {
   await initializeExtension();
 });
 
-// Add logging for when rules are triggered
-chrome.declarativeNetRequest.onRuleMatchedDebug.addListener((details) => {
-  console.log("🚫 Rule matched and triggered:", {
-    url: details.request.url,
-    ruleId: details.rule.ruleId,
-    tabId: details.request.tabId,
-    type: details.request.type,
-    method: details.request.method,
-    timestamp: new Date().toISOString(),
-  });
-});
+chrome.declarativeNetRequest.onRuleMatchedDebug.addListener((details) => {});
 
 // Add logging and blocking for tab navigation attempts
 chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
   if (changeInfo.url && changeInfo.status === "loading") {
-    console.log("🌐 Tab navigation detected:", {
-      tabId: tabId,
-      url: changeInfo.url,
-      status: changeInfo.status,
-      timestamp: new Date().toISOString(),
-    });
-
     // Check if this URL should be blocked
     const blockingState = await getBlockingState();
     if (blockingState.isBlocking && blockingState.blockedSites.length > 0) {
@@ -66,22 +49,12 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
       });
 
       if (shouldBlock) {
-        console.log("🚫 BLOCKING navigation via tabs API:", {
-          url: changeInfo.url,
-          hostname: hostname,
-          blockedSites: blockingState.blockedSites,
-          shouldBlock: shouldBlock,
-        });
-
         // Force redirect to blocked page
         try {
           await chrome.tabs.update(tabId, {
             url: chrome.runtime.getURL("blocked.html"),
           });
-          console.log("✅ Successfully redirected tab to blocked page");
-        } catch (error) {
-          console.error("❌ Failed to redirect tab:", error);
-        }
+        } catch (error) {}
       }
     }
   }
@@ -124,9 +97,7 @@ async function initializeExtension() {
 
     // Clear any existing blocking if time has passed
     await checkBlockingStatus();
-  } catch (error) {
-    console.error("Failed to initialize extension:", error);
-  }
+  } catch (error) {}
 }
 
 // Check if current blocking should be cleared
@@ -150,9 +121,7 @@ async function checkBlockingStatus() {
       // Clear any stale rules if not blocking
       await updateBlockingRules([]);
     }
-  } catch (error) {
-    console.error("Failed to check blocking status:", error);
-  }
+  } catch (error) {}
 }
 
 // Update blocking rules using declarativeNetRequest
@@ -162,20 +131,13 @@ async function updateBlockingRules(sites) {
     const existingRules = await chrome.declarativeNetRequest.getDynamicRules();
     const ruleIdsToRemove = existingRules.map((rule) => rule.id);
 
-    console.log(
-      `🧹 Removing ${existingRules.length} existing rules:`,
-      ruleIdsToRemove,
-    );
-
     if (ruleIdsToRemove.length > 0) {
       await chrome.declarativeNetRequest.updateDynamicRules({
         removeRuleIds: ruleIdsToRemove,
       });
-      console.log("✅ Existing rules removed successfully");
     }
 
     if (!sites || sites.length === 0) {
-      console.log("ℹ️ No sites to block, clearing all rules");
       return; // No sites to block
     }
 
@@ -187,8 +149,6 @@ async function updateBlockingRules(sites) {
         .replace(/^www\./, "")
         .replace(/^https?:\/\//, "")
         .replace(/\/$/, ""); // Remove trailing slash
-
-      console.log(`🔧 Creating comprehensive rules for site: ${cleanSite}`);
 
       // Rule 1: Block using requestDomains (most reliable approach)
       rules.push({
@@ -351,19 +311,6 @@ async function updateBlockingRules(sites) {
       });
     });
 
-    console.log(
-      `📝 Adding ${rules.length} comprehensive blocking rules for sites:`,
-      sites,
-    );
-    console.log(
-      "🔍 Rule details:",
-      rules.map((r) => ({
-        id: r.id,
-        urlFilter: r.condition.urlFilter,
-        requestDomains: r.condition.requestDomains,
-      })),
-    );
-
     // Add the new rules
     await chrome.declarativeNetRequest.updateDynamicRules({
       addRules: rules,
@@ -371,17 +318,7 @@ async function updateBlockingRules(sites) {
 
     // Verify rules were added
     const addedRules = await chrome.declarativeNetRequest.getDynamicRules();
-    console.log(
-      `✅ Successfully added ${addedRules.length} dynamic rules`,
-      addedRules.map((r) => ({
-        id: r.id,
-        urlFilter: r.condition.urlFilter,
-        requestDomains: r.condition.requestDomains,
-      })),
-    );
-  } catch (error) {
-    console.error("❌ Failed to update blocking rules:", error);
-  }
+  } catch (error) {}
 }
 
 // Handle alarms for blocking timer
@@ -402,7 +339,6 @@ async function handleMessage(request, sender, sendResponse) {
   try {
     switch (request.action) {
       case "startBlocking":
-        console.log("Starting blocking with data:", request.data);
         await startBlocking(request.data);
         sendResponse({ success: true });
         break;
@@ -441,7 +377,6 @@ async function handleMessage(request, sender, sendResponse) {
         sendResponse({ success: false, error: "Unknown action" });
     }
   } catch (error) {
-    console.error("Message handling error:", error);
     sendResponse({ success: false, error: error.message });
   }
 }

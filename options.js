@@ -15,7 +15,6 @@ async function initializeOptionsPage() {
     await loadDistractionNotes();
     await loadStatistics();
   } catch (error) {
-    console.error("Failed to initialize options page:", error);
     showNotification("Failed to load settings", "error");
   }
 }
@@ -68,7 +67,6 @@ async function loadProfiles() {
       profileList.appendChild(profileElement);
     });
   } catch (error) {
-    console.error("Failed to load profiles:", error);
     showNotification("Failed to load profiles", "error");
   }
 }
@@ -131,7 +129,6 @@ async function editProfile(profileId) {
     document.getElementById("profile-sites").value = profile.sites.join("\n");
     showProfileForm(true);
   } catch (error) {
-    console.error("Failed to edit profile:", error);
     showNotification("Failed to load profile for editing", "error");
   }
 }
@@ -150,7 +147,6 @@ async function deleteProfile(profileId) {
     await loadProfiles();
     showNotification("Profile deleted successfully", "success");
   } catch (error) {
-    console.error("Failed to delete profile:", error);
     showNotification("Failed to delete profile", "error");
   }
 }
@@ -208,7 +204,6 @@ async function saveProfile(event) {
     hideProfileForm();
     showNotification("Profile saved successfully", "success");
   } catch (error) {
-    console.error("Failed to save profile:", error);
     showNotification("Failed to save profile", "error");
   }
 }
@@ -220,9 +215,7 @@ async function loadDifficultySetting() {
     document.querySelector(
       `input[name="difficulty"][value="${difficulty}"]`,
     ).checked = true;
-  } catch (error) {
-    console.error("Failed to load difficulty setting:", error);
-  }
+  } catch (error) {}
 }
 
 // Save difficulty setting
@@ -234,7 +227,6 @@ async function saveDifficulty() {
     await setStorageData("mathDifficulty", difficulty);
     showNotification("Difficulty setting saved", "success");
   } catch (error) {
-    console.error("Failed to save difficulty setting:", error);
     showNotification("Failed to save difficulty setting", "error");
   }
 }
@@ -261,7 +253,6 @@ async function loadDistractionNotes() {
       notesList.appendChild(noteElement);
     });
   } catch (error) {
-    console.error("Failed to load distraction notes:", error);
     showNotification("Failed to load distraction notes", "error");
   }
 }
@@ -293,7 +284,6 @@ async function clearAllNotes() {
     await loadDistractionNotes();
     showNotification("All notes cleared", "success");
   } catch (error) {
-    console.error("Failed to clear notes:", error);
     showNotification("Failed to clear notes", "error");
   }
 }
@@ -307,9 +297,7 @@ async function loadStatistics() {
     document.getElementById("total-time").textContent = "0h 0m";
     document.getElementById("early-unblocks").textContent = "0";
     document.getElementById("completed-sessions").textContent = "0";
-  } catch (error) {
-    console.error("Failed to load statistics:", error);
-  }
+  } catch (error) {}
 }
 
 // Clear all extension data (for development purposes)
@@ -347,16 +335,12 @@ async function resetStatistics() {
           removeRuleIds: ruleIdsToRemove,
         });
       }
-    } catch (ruleError) {
-      console.warn("Could not clear blocking rules:", ruleError);
-    }
+    } catch (ruleError) {}
 
     // Clear any active alarms
     try {
       await chrome.alarms.clear("blockingTimer");
-    } catch (alarmError) {
-      console.warn("Could not clear alarms:", alarmError);
-    }
+    } catch (alarmError) {}
 
     // Reload the page data to show empty state
     await initializeOptionsPage();
@@ -365,10 +349,7 @@ async function resetStatistics() {
       "🧹 All extension data cleared successfully! Extension reset to clean state.",
       "success",
     );
-
-    console.log("🔄 Extension data cleared - clean slate for testing");
   } catch (error) {
-    console.error("Failed to clear extension data:", error);
     showNotification("❌ Failed to clear all extension data", "error");
   }
 }

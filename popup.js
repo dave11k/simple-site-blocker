@@ -20,7 +20,6 @@ async function initializePopup() {
 
     await loadProfiles();
   } catch (error) {
-    console.error("Failed to initialize popup:", error);
     showError("Failed to load extension state");
   }
 }
@@ -93,7 +92,6 @@ async function showMathChallenge() {
 
     displayMathProblem(challengeState);
   } catch (error) {
-    console.error("Failed to generate math challenge:", error);
     showError("Failed to generate math challenge");
   }
 }
@@ -151,7 +149,6 @@ async function startBlocking() {
     showBlockingState(blockingState);
     startTimer(blockingState.blockEndTime);
   } catch (error) {
-    console.error("Failed to start blocking:", error);
     showError("Failed to start blocking");
   }
 }
@@ -171,9 +168,7 @@ async function loadProfiles() {
       option.textContent = profile.name;
       select.appendChild(option);
     });
-  } catch (error) {
-    console.error("Failed to load profiles:", error);
-  }
+  } catch (error) {}
 }
 
 // Get profiles from storage
@@ -256,7 +251,6 @@ async function addDistractionNote() {
     document.getElementById("distraction-note").value = "";
     showSuccess("Note added successfully");
   } catch (error) {
-    console.error("Failed to add distraction note:", error);
     showError("Failed to add note");
   }
 }
@@ -322,7 +316,6 @@ async function submitMathAnswer() {
       answerInput.focus();
     }
   } catch (error) {
-    console.error("Failed to submit math answer:", error);
     showMathFeedback("Failed to submit answer", "error");
   }
 }
@@ -343,7 +336,6 @@ function showError(message) {
 // Show success message
 function showSuccess(message) {
   // Simple success display - could be enhanced with better UI
-  console.log("Success: " + message);
 }
 
 // Send message to background script
