@@ -314,10 +314,7 @@ async function submitMathAnswer() {
         }, 1000);
       }
     } else {
-      showMathFeedback(
-        `Incorrect. The answer was ${result.correctAnswer}. Try again!`,
-        "error",
-      );
+      showMathFeedback("Incorrect. Try again!", "error");
       answerInput.value = "";
       answerInput.focus();
     }
