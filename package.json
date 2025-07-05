@@ -1,7 +1,7 @@
 {
   "name": "simple-site-blocker",
   "version": "1.0.0",
-  "description": "A Chrome extension that blocks websites for specified durations with math challenges for early unblocking",
+  "description": "Block websites for specified durations with math challenges for early unblocking and quick distraction note-taking so you keep those important ideas while staying focused.",
   "scripts": {
     "build": "npm run format && npm run check",
     "format": "prettier --write .",
