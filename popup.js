@@ -257,6 +257,7 @@ async function addDistractionNote() {
     document.getElementById("distraction-note").value = "";
     showSuccess("Note added successfully");
   } catch (error) {
+    console.log(error);
     showError("Failed to add note");
   }
 }
@@ -355,6 +356,35 @@ function showError(message) {
   setTimeout(() => {
     if (errorDiv.parentNode) {
       errorDiv.parentNode.removeChild(errorDiv);
+    }
+  }, 3000);
+}
+
+// Show success message
+function showSuccess(message) {
+  // Create a temporary success notification
+  const successDiv = document.createElement("div");
+  successDiv.className = "success-notification";
+  successDiv.textContent = message;
+  successDiv.style.cssText = `
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #27ae60;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-size: 14px;
+    z-index: 1000;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+  `;
+  document.body.appendChild(successDiv);
+
+  // Remove after 3 seconds
+  setTimeout(() => {
+    if (successDiv.parentNode) {
+      successDiv.parentNode.removeChild(successDiv);
     }
   }, 3000);
 }
