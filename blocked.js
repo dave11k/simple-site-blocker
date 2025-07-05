@@ -234,13 +234,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Handle attempt unblock
   document.getElementById("attempt-unblock").addEventListener("click", () => {
-    chrome.runtime.sendMessage({ action: "openPopup" }, (response) => {
-      if (chrome.runtime.lastError) {
-        alert(
-          "Please click the Simple Site Blocker extension icon to attempt unblocking",
-        );
-      }
-    });
+    showFeedback(
+      "Please click the Simple Site Blocker extension icon to attempt unblocking",
+      "error",
+    );
   });
 
   // Add small delay to ensure Chrome extension APIs are available

@@ -281,7 +281,9 @@ async function loadDifficultySetting() {
     document.querySelector(
       `input[name="difficulty"][value="${difficulty}"]`,
     ).checked = true;
-  } catch (error) {}
+  } catch (error) {
+    // Failed to load difficulty setting - defaults to medium
+  }
 }
 
 // Save difficulty setting (auto-save)
@@ -381,7 +383,9 @@ async function loadStatistics() {
     document.getElementById("total-time").textContent = "0h 0m";
     document.getElementById("early-unblocks").textContent = "0";
     document.getElementById("completed-sessions").textContent = "0";
-  } catch (error) {}
+  } catch (error) {
+    // Failed to load statistics - display remains with defaults
+  }
 }
 
 // Show clear data modal
@@ -421,12 +425,16 @@ async function handleClearDataConfirmation() {
           removeRuleIds: ruleIdsToRemove,
         });
       }
-    } catch (ruleError) {}
+    } catch (ruleError) {
+      // Failed to clear blocking rules - some rules may remain active
+    }
 
     // Clear any active alarms
     try {
       await chrome.alarms.clear("blockingTimer");
-    } catch (alarmError) {}
+    } catch (alarmError) {
+      // Failed to clear alarms - timer may continue running
+    }
 
     // Reload the page data to show empty state
     await initializeOptionsPage();

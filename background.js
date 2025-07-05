@@ -26,8 +26,6 @@ chrome.runtime.onInstalled.addListener(async () => {
   await initializeExtension();
 });
 
-chrome.declarativeNetRequest.onRuleMatchedDebug.addListener((details) => {});
-
 // Add logging and blocking for tab navigation attempts
 chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
   if (changeInfo.url && changeInfo.status === "loading") {
@@ -54,7 +52,9 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
           await chrome.tabs.update(tabId, {
             url: chrome.runtime.getURL("blocked.html"),
           });
-        } catch (error) {}
+        } catch (error) {
+          // Tab may have been closed or navigation prevented
+        }
       }
     }
   }
@@ -97,7 +97,9 @@ async function initializeExtension() {
 
     // Clear any existing blocking if time has passed
     await checkBlockingStatus();
-  } catch (error) {}
+  } catch (error) {
+    // Storage initialization failed - extension may still work with defaults
+  }
 }
 
 // Check if current blocking should be cleared
@@ -121,7 +123,9 @@ async function checkBlockingStatus() {
       // Clear any stale rules if not blocking
       await updateBlockingRules([]);
     }
-  } catch (error) {}
+  } catch (error) {
+    // Failed to check blocking status - may continue with stale state
+  }
 }
 
 // Update blocking rules using declarativeNetRequest
@@ -315,10 +319,9 @@ async function updateBlockingRules(sites) {
     await chrome.declarativeNetRequest.updateDynamicRules({
       addRules: rules,
     });
-
-    // Verify rules were added
-    const addedRules = await chrome.declarativeNetRequest.getDynamicRules();
-  } catch (error) {}
+  } catch (error) {
+    // Failed to update blocking rules - blocking may not work properly
+  }
 }
 
 // Handle alarms for blocking timer

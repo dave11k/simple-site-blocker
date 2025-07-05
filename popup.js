@@ -169,7 +169,9 @@ async function loadProfiles() {
       option.textContent = profile.name;
       select.appendChild(option);
     });
-  } catch (error) {}
+  } catch (error) {
+    // Failed to load profiles - user can still enter sites manually
+  }
 }
 
 // Get profiles from storage
@@ -333,13 +335,31 @@ function showMathFeedback(message, type) {
 
 // Show error message
 function showError(message) {
-  // Simple error display - could be enhanced with better UI
-  alert("Error: " + message);
-}
+  // Create a temporary error notification
+  const errorDiv = document.createElement("div");
+  errorDiv.className = "error-notification";
+  errorDiv.textContent = "Error: " + message;
+  errorDiv.style.cssText = `
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #e74c3c;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-size: 14px;
+    z-index: 1000;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+  `;
+  document.body.appendChild(errorDiv);
 
-// Show success message
-function showSuccess(message) {
-  // Simple success display - could be enhanced with better UI
+  // Remove after 3 seconds
+  setTimeout(() => {
+    if (errorDiv.parentNode) {
+      errorDiv.parentNode.removeChild(errorDiv);
+    }
+  }, 3000);
 }
 
 // URL cleaning function to handle user input formatting
