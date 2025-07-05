@@ -527,35 +527,19 @@ function generateEasyProblem() {
 
 // Generate medium math problem
 function generateMediumProblem() {
-  const operations = ["+", "-", "*"];
+  const operations = ["+", "-"];
   const op = operations[Math.floor(Math.random() * operations.length)];
-  let num1, num2;
 
-  if (op === "*") {
-    num1 = Math.floor(Math.random() * 90) + 10; // 2-digit for multiplication
-    num2 = Math.floor(Math.random() * 90) + 10; // 2-digit for multiplication
-  } else {
-    num1 = Math.floor(Math.random() * 900) + 100; // 3-digit numbers (100-999)
-    num2 = Math.floor(Math.random() * 900) + 100; // 3-digit numbers (100-999)
-  }
+  // Generate 3-digit numbers (100-999)
+  let num1 = Math.floor(Math.random() * 900) + 100;
+  let num2 = Math.floor(Math.random() * 900) + 100;
 
   // Ensure subtraction results in positive numbers
   if (op === "-" && num1 < num2) {
     [num1, num2] = [num2, num1];
   }
 
-  let answer;
-  switch (op) {
-    case "+":
-      answer = num1 + num2;
-      break;
-    case "-":
-      answer = num1 - num2;
-      break;
-    case "*":
-      answer = num1 * num2;
-      break;
-  }
+  const answer = op === "+" ? num1 + num2 : num1 - num2;
 
   return {
     question: `${num1} ${op} ${num2}`,
