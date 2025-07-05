@@ -1,0 +1,52 @@
+PRIVACY POLICY FOR SIMPLE SITE BLOCKER
+
+Last Updated: July 5, 2025
+
+1. WHAT DATA WE COLLECT
+
+Simple Site Blocker collects and stores the following data locally on your device:
+- Website blocking profiles (lists of websites you choose to block)
+- Distraction notes (text notes you write during blocking sessions)
+- Math difficulty preference (easy, medium, or hard)
+- Blocking session state (active/inactive status and timer information)
+
+2. HOW WE USE YOUR DATA
+
+All data collected by Simple Site Blocker is:
+- Stored locally on your device using Chrome's local storage
+- Used solely to provide the extension's functionality
+- Never transmitted to external servers or third parties
+- Never shared, sold, or distributed to any other parties
+
+3. DATA STORAGE AND SECURITY
+
+- All data is stored locally on your device only
+- No data is sent to remote servers or cloud services
+- No personal identifying information is collected
+- No tracking or analytics are performed
+
+4. HOW TO ACCESS, MODIFY, OR DELETE YOUR DATA
+
+You can manage your data at any time through the extension:
+- View/edit blocking profiles in the Settings page
+- View/clear distraction notes in the Settings page
+- Reset all extension data using the "Clear All Data" button in Settings
+- Uninstall the extension to remove all data permanently
+
+5. THIRD-PARTY SERVICES
+
+Simple Site Blocker does not use any third-party services, analytics, or tracking tools.
+
+6. CHILDREN'S PRIVACY
+
+This extension does not knowingly collect any personal information from children under 13.
+
+7. CHANGES TO THIS POLICY
+
+Any changes to this privacy policy will be reflected in the extension's updated version.
+
+8. CONTACT
+
+For privacy-related questions, please visit the extension's GitHub repository or Chrome Web Store listing.
+
+This privacy policy ensures your data remains private and secure, stored only on your device.
